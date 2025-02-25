@@ -50,7 +50,7 @@ main(int argc, char *argv[])
         p = strrchr(cmd, '\0');
         if (p > cmd && p[-1] == ' ')
                 p[-1] = '\0';
-        execvp(argv[1], &argv[i]);
+        execvp(argv[i], &argv[i]);
         perror("execvp");
         free(cmd);
         return 1;

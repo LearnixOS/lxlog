@@ -14,15 +14,14 @@ int
 main(int argc, char *argv[])
 {
         const char *pkg = NULL, *log = NULL;
-        char *cmd, *p;
-        int i;
+        int i, cmd_start;
 
         for (i = 1; i < argc; i++) {
-                if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "pkgname")) {
+                if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--pkgname")) {
                         if (++i >= argc)
                                 usage();
                         pkg = argv[i];
-                } else if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "log")) {
+                } else if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "--log")) {
                         if (++i >= argc)
                                 usage();
                         log = argv[i];
@@ -32,26 +31,16 @@ main(int argc, char *argv[])
         }
         if (i >= argc || !pkg || !log)
                 usage();
-        setenv("LXLOG_PKG", pkg, 1);
-        setenv("LXLOG_FILE", log, 1);
-        setenv("LD_PRELOAD", "/usr/lib/liblxlog.so", 1);
 
-        cmd = malloc(4096); /* just a random amount */
-        if (!cmd) {
-                perror("malloc");
-                return 1;
-        }
-        cmd[0] = '\0';
-        for (; i < argc; i++) {
-                strncat(cmd, argv[i], 4096 - strlen(cmd) - 1);
-                strncat(cmd, " ", 4096 - strlen(cmd) - 1);
-        }
+	cmd_start = i;
 
-        p = strrchr(cmd, '\0');
-        if (p > cmd && p[-1] == ' ')
-                p[-1] = '\0';
-        execvp(argv[i], &argv[i]);
-        perror("execvp");
-        free(cmd);
-        return 1;
+	/* Set environment */
+	setenv("LXLOG_PKG", pkg, 1);
+	setenv("LXLOG_FILE", log, 1);
+	setenv("LD_PRELOAD", "/usr/lib/liblxlog.so", 1);
+
+	/* Execute the command directly with argv */
+	execvp(argv[cmd_start], &argv[cmd_start]);
+	perror("execvp");
+	return 1;
 }
